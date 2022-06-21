@@ -48,7 +48,6 @@ var alphabet2 = new Dictionary<string, char>
     {"i{", 'к' },
     {"|{", 'к' },
     {"ji", 'л' },
-    {"ji", 'л' },
     {"ph", 'ф' },
     {"}{", 'х' },
     {"ch", 'ч' },
@@ -693,39 +692,86 @@ var DitryWords = new[]
 
 timer.Start();
 
-var originalText = "Мой друг лоh. А вы там все пездюки и у вас полная жжжоп@!!! Через пробелы с у к а";
+var originalText = "Мой друг ло}{. А вы там все пездюки и у вас полная жжжоп@!!! Через пробелы с у к а";
 _logger.Information($"Оригинальный текст = '{originalText}'");
 
 _logger.Information("Этап подготовки текста");
-var preparePhrase = PreparePhrase(alphabet1, alphabet2, originalText);
-
+var cleartext = PreparePhrase(alphabet1, alphabet2, originalText);
+_logger.Information($"Очищенный текст = '{cleartext}'");
 
 _logger.Information("Этап поиска мата");
-Check(DitryWords, preparePhrase);
+Check(DitryWords, cleartext);
 
 timer.Stop();
 _logger.Information($"Время = '{timer.Elapsed.TotalMilliseconds}' мс");
 _logger.Information($"THE END");
-
-
-
-
 
 string PreparePhrase(Dictionary<char, char> alphabet1, Dictionary<string, char> alphabet2, string originalText)
 {
     var removeDoubleChar = RemoveDoubleCharAndPunctuationMarks(originalText);
     _logger.Information($"Удаляем задублированные символы и знаки препинания = '{removeDoubleChar}'");
 
-    var replaceStrings = ReplaceStrings(alphabet2, removeDoubleChar);
+    var replaceStrings = ReplacDoubleChars(alphabet2, removeDoubleChar);
     _logger.Information($"Заменяем символы из словаря 2 = '{replaceStrings}'");
-  
-    var replaceSymbols = ReplaceSymbols(alphabet1, replaceStrings);
+
+    var replaceSymbols = ReplaceChars(alphabet1, replaceStrings);
     _logger.Information($"Заменяем символы из словаря = '{replaceSymbols}'");
 
-    return replaceSymbols;
+    return replaceSymbols.Replace(" ", "");
 }
 
-string ReplaceSymbols(Dictionary<char, char> alphabet, string text)
+string RemoveDoubleCharAndPunctuationMarks(string text)
+{
+    var marks = new char[] { '.', '!', '?', '.', ',', ':', ':', '-', '"' };
+    var str = new StringBuilder();
+    str.Append(marks.Contains(text[0]) ? ' ' : text[0]);
+    int repeatCount = 0;
+
+    for (int i = 1; i < text.Length; i++)
+    {
+        var currentChar = text[i];
+        var beforeChar = text[i - 1];
+
+        repeatCount = currentChar == beforeChar ? repeatCount + 1 : 0;
+
+        if (repeatCount < 1)
+        {
+            str.Append(marks.Contains(currentChar) ? ' ' : currentChar);
+        }
+    }
+
+    return str.ToString().Trim().ToLower();
+}
+
+string ReplacDoubleChars(Dictionary<string, char> alphabet, string text)
+{
+    var str = new StringBuilder();
+    var buffer = new StringBuilder();
+
+    for (int i = 1; i < text.Length; i++)
+    {
+        buffer.Append(text[i - 1]);
+        buffer.Append(text[i]);
+
+        if (alphabet.TryGetValue(buffer.ToString(), out var changedSymbol))
+        {
+            str.Append(changedSymbol);
+            ++i;
+        }
+        else
+        {
+            str.Append(text[i - 1]);
+        }
+
+        buffer.Clear();
+    }
+
+    str.Append(text[^1]);
+
+    return str.ToString();
+}
+
+string ReplaceChars(Dictionary<char, char> alphabet, string text)
 {
     var str = new StringBuilder();
 
@@ -741,42 +787,18 @@ string ReplaceSymbols(Dictionary<char, char> alphabet, string text)
         }
     }
 
-    return str.ToString().ToLower();
-}
-
-string ReplaceStrings(Dictionary<string, char> alphabet, string text)
-{
-    var str = new StringBuilder();
-
-    foreach (var originalSymbol in text)
-    {
-        if (alphabet.TryGetValue(originalSymbol, out var changedSymbol))
-        {
-            str.Append(changedSymbol);
-        }
-        else
-        {
-            str.Append(originalSymbol);
-        }
-    }
-
-    return str.ToString().ToLower();
+    return str.ToString();
 }
 
 bool Check(string[] obsceneWords, string phrase)
 {
-    _logger.Information($"ЭТАП 2. Проверка на мат");
     foreach (var word in obsceneWords)
     {
-        // _logger.Information($"Ищем слово '{word}'");
-
         for (int part = 0; part < phrase.Length; part++)
         {
             var fragment = phrase.Substring(part, phrase.Length - part > word.Length ? word.Length : phrase.Length - part);
             var distance = GetDistance(fragment, word);
             var normilize = word.Length <= 4 ? 0 : word.Length * 0.20;
-
-            //  _logger.Information($"part = '{part}', fragment = '{fragment}', ищем '{word}'. GetDistance = {distance}. ");
 
             if (distance <= normilize)
             {
@@ -795,7 +817,6 @@ double GetDistance(string originText, string template)
 
     if (n > m)
     {
-        // Make sure n <= m, to use O(min(n, m)) space
         (originText, template) = (template, originText);
         (m, n) = (n, m);
     }
@@ -824,25 +845,3 @@ double GetDistance(string originText, string template)
     return current_row[n];
 }
 
-static string RemoveDoubleCharAndPunctuationMarks(string text)
-{
-    var marks = new char[] { '.', '!', '?', '.', ',', ':', ':', '-', '"' };
-    var str = new StringBuilder();
-    str.Append(marks.Contains(text[0]) ? ' ' : text[0]);
-    int repeatCount = 0;
-
-    for (int i = 1; i < text.Length; i++)
-    {
-        var currentChar = text[i];
-        var beforeChar = text[i - 1];
-
-        repeatCount = currentChar == beforeChar ? repeatCount + 1 : 0;
-
-        if (repeatCount < 1)
-        {
-            str.Append(marks.Contains(currentChar) ? ' ' : currentChar);
-        }
-    }
-
-    return str.ToString().Trim().ToLower();
-}
