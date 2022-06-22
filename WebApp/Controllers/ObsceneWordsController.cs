@@ -13,13 +13,16 @@ namespace WebApp.Controllers
     {
         private readonly ILogger<ObsceneWordsController> _logger;
         private readonly ObsceneWordsOption _obsceneWordsOption;
+        private readonly DirtyWordsOption dirtyWordsOption;
 
         public ObsceneWordsController(
             ILogger<ObsceneWordsController> logger,
-            IOptionsMonitor<ObsceneWordsOption> optionsMonitor)
+            IOptionsMonitor<ObsceneWordsOption> optionsMonitor,
+             IOptionsMonitor<DirtyWordsOption> dirtyWordsOption)
         {
             _logger = logger;
             _obsceneWordsOption = optionsMonitor.CurrentValue;
+            this.dirtyWordsOption = dirtyWordsOption.CurrentValue;
         }
 
         [HttpGet]

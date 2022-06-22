@@ -255,7 +255,6 @@ var DitryWords = new[]
             "елдак",
             "елдачить",
             "жопа",
-            "жопу",
             "заговнять",
             "задрачивать",
             "задристать",
@@ -593,11 +592,9 @@ var DitryWords = new[]
             "суки",
             "суходрочка",
             "сучара",
-            "сучий",
-            "сучка",
             "сучко",
             "сучонок",
-            "сучье",
+            "сучок",
             "сцание",
             "сцать",
             "ссать",
@@ -805,7 +802,7 @@ bool Check(string[] obsceneWords, string phrase)
                 _logger.Information($"part = '{part}', fragment = '{fragment}', ищем '{word}'. GetDistance = {distance}. ");
                 _logger.Error($"МАТ = '{word}'");
             }
-        }
+        } 
     }
 
     return false;
