@@ -18,11 +18,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<ObsceneWordsOption>(builder.Configuration.GetSection(nameof(ObsceneWordsOption)));
-builder.Services.Configure<DirtyWordsOption>(
-    builder.Configuration.GetSection(nameof(DirtyWordsOption))
-    .GetChildren()
-    .First(x => x.Key == "Alphabet")
-    .Value.ToDictionary<char, char>(x => x., x => x.Value));
+builder.Services.Configure<DirtyWordsOption>(builder.Configuration.GetSection(nameof(DirtyWordsOption)));
 
 var app = builder.Build();
 
