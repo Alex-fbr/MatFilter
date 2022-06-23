@@ -725,7 +725,7 @@ namespace BenchMarks
         }
 
 
-      //  [Benchmark(Description = "FindDirtyWord2")]
+        [Benchmark(Description = "FindDirtyWord2")]
         public (bool isContain, string? dirtyWord) FindDirtyWord2()
         {
             var text = OriginalText.ToLower();
@@ -747,24 +747,26 @@ namespace BenchMarks
                 var currentChar = text[i];
                 var beforeChar = text[i - 1];
 
-                if (currentChar != beforeChar)
+                if (currentChar == beforeChar)
                 {
-                    var insertChar = _options.ReplaceSymbols.TryGetValue(currentChar, out var changedSymbol) ? changedSymbol : currentChar;
+                    continue;
+                }
 
-                    if (insertChar == ' ' && _marks.Contains(beforeChar))
-                    {
-                        continue;
-                    }
+                var insertChar = _options.ReplaceSymbols.TryGetValue(currentChar, out var changedSymbol) ? changedSymbol : currentChar;
 
-                    if (!_marks.Contains(currentChar))
-                    {
-                        sb.Append(insertChar);
-                    }
-                    else if(sb.Length > 0)
-                    {
-                        words.Add(sb.ToString());
-                        sb.Clear();
-                    }
+                if (insertChar == ' ' && _marks.Contains(beforeChar))
+                {
+                    continue;
+                }
+
+                if (!_marks.Contains(currentChar))
+                {
+                    sb.Append(insertChar);
+                }
+                else if (sb.Length > 0)
+                {
+                    words.Add(sb.ToString());
+                    sb.Clear();
                 }
             }
 
