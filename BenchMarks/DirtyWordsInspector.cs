@@ -4,6 +4,13 @@ using BenchmarkDotNet.Attributes;
 
 namespace BenchMarks
 {
+    [MemoryDiagnoser]
+    //[InliningDiagnoser]
+    //[TailCallDiagnoser]
+    //[EtwProfiler]
+    //[ConcurrencyVisualizerProfiler]
+    //[NativeMemoryProfiler]
+    [ThreadingDiagnoser]
     public class DirtyWordsInspector
     {
         private const int MaxTextLength = 500;
@@ -692,8 +699,6 @@ namespace BenchMarks
         }
 
         [Params(
-            "сук@",
-            "мне пох",
             "Умер певец, солист группы «Ласковый май» Юрий Шатунов. Шатунову было 48 лет. Причиной смерти стал инфаркт, сообщает РБК. Представитель певца сообщил РИА Новости, что Шатунов умер в машине скорой помощи в ночь на 23 июня. Это просто пиздец!!!"
             )]
         public string OriginalText { get; set; }
@@ -723,7 +728,6 @@ namespace BenchMarks
 
             return (false, null);
         }
-
 
         [Benchmark(Description = "FindDirtyWord2")]
         public (bool isContain, string? dirtyWord) FindDirtyWord2()
